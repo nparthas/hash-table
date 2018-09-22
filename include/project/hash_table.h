@@ -2,6 +2,8 @@
 #define HASH_TABLE_HASH_TABLE_H
 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct hashitem_t {
     char *key;
@@ -24,4 +26,4 @@ char *hashtable_search(hashtable *ht, const char *key);
 
 void hashtable_remove(hashtable *ht, const char *key);
 
-#endif //HASH_TABLE_HASH_TABLE_H
+#endif  // HASH_TABLE_HASH_TABLE_H

@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "project/hash_table.h"
 
 static hashitem DELETED_ITEM = {NULL, NULL};
