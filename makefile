@@ -16,7 +16,7 @@ DEPS = $(OBJECTS:.o=.d)
 COMPILE_FLAGS = -std=c11 -Wall -Wextra -g
 INCLUDES = -I include/ -I /usr/local/include -I /usr/include 
 
-LIBS =
+LIBS = 
 
 .PHONY: default_target
 default_target: release
@@ -51,7 +51,7 @@ all: $(BIN_PATH)/$(BIN_NAME)
 # Creation of the executable
 $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
-	$(CC) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ -lm
 
 # Add dependency files, if they exist
 -include $(DEPS)

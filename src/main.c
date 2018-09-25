@@ -2,23 +2,17 @@
 #include "project/hash_table.h"
 #include "project/primes.h"
 
-
-#include<math.h>
-
 int main() {
-
-
-    bool b = is_prime(56);
-    int a = sqrt(16);
-
-    char *key = "key";
-    char *value = "value";
+    const char *key = "key";
+    const char *value = "value";
 
     hashtable *table = new_hashtable();
     del_hashtable(table);
 
+    bool p = is_prime(16);
+    int c = next_prime(17);
 
-    printf("Including math.h, %d\n", a);
-    printf("%d\n", b);
+    printf("16 is prime: %d, next prime after 17: %d\n", p, c);
+
     return 0;
 }
