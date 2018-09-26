@@ -1,6 +1,7 @@
 #ifndef HASH_TABLE_HASH_TABLE_H
 #define HASH_TABLE_HASH_TABLE_H
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,7 +1,13 @@
 #include "project/hash_table.h"
 
+#include <stdio.h>
+
+#define HT_PRIME_1 101
+#define HT_PRIME_2 103
+
 static hashitem DELETED_ITEM = {NULL, NULL};
 
+// not used, does not overflow properly
 static long power_l(int base, int exponent) {
     int result = 1;
     while (exponent) {
@@ -29,7 +35,7 @@ static void del_hashitem(hashitem *item) {
 
 hashtable *new_hashtable() {
     hashtable *table = malloc(sizeof(hashtable));
-    table->size = 53;
+    table->size = 53;  // needs to be changed to be dynamic
     table->count = 0;
     table->items = calloc((size_t)table->size, sizeof(hashitem *));
     return table;
@@ -38,7 +44,8 @@ hashtable *new_hashtable() {
 void del_hashtable(hashtable *table) {
     for (int i = 0; i < table->size; i++) {
         hashitem *item = table->items[i];
-        if (item) {
+        // we don't want to remove the deleted item
+        if (item && item != &DELETED_ITEM) {
             del_hashitem(item);
         }
     }
@@ -48,15 +55,11 @@ static int hash(const char *str, const int hash_prime, const int num_buckets) {
     long hash = 0;
     const int str_len = strlen(str);
     for (int i = 0; i < str_len; i++) {
-        hash += power_l(hash_prime, str_len - (i + 1) * str[i]);
+        hash += powl(hash_prime, str_len - (i + 1) * str[i]);
         hash %= num_buckets;
     }
     return (int)hash;
 }
-
-// just so that it can compile
-#define HT_PRIME_1 1
-#define HT_PRIME_2 2
 
 static int get_hash(const char *str, const int num_buckets, const int attempt) {
     const int hash_a = hash(str, HT_PRIME_1, num_buckets);

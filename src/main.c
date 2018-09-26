@@ -3,16 +3,20 @@
 #include "project/primes.h"
 
 int main() {
-    const char *key = "key";
-    const char *value = "value";
+    const char *key = "insert key";
+    const char *value = "insert value";
 
     hashtable *table = new_hashtable();
+
+    hashtable_insert(table, key, value);
+
+    const char *result = hashtable_search(table, key);
+
+    hashtable_remove(table, key);
+
+    const char *del_item = hashtable_search(table, key);
+
     del_hashtable(table);
-
-    bool p = is_prime(16);
-    int c = next_prime(17);
-
-    printf("16 is prime: %d, next prime after 17: %d\n", p, c);
 
     return 0;
 }

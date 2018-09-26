@@ -43,3 +43,7 @@ build/*
 
 # exe-name
 hash-table
+
+
+# vs code config
+.vscode/
