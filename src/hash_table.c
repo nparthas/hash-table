@@ -33,14 +33,16 @@ static void hashtable_resize(hashtable *ht, const int base_size) {
         hashitem *item = ht->items[i];
         if (item != NULL && item != &HT_DELETED_ITEM) {
             hashtable_insert(temp_ht, item->key, item->value);
+            ht->items[i] = NULL;
         }
     }
-    // swap references
-    ht->base_size = temp_ht->base_size;
-    ht->count = temp_ht->count;
-    ht->size = temp_ht->size;
 
-    printf("old %p new %p\n", ht->items, temp_ht->items);
+    ht->count = temp_ht->count;
+    // swap the count for the delete call
+    ht->size ^= temp_ht->size;
+    temp_ht->size ^= ht->size;
+    ht->size ^= temp_ht->size;
+
     hashitem **tmp = ht->items;
     ht->items = temp_ht->items;
     temp_ht->items = tmp;
@@ -50,7 +52,6 @@ static void hashtable_resize(hashtable *ht, const int base_size) {
 }
 
 static void hashtable_resize_up(hashtable *table) {
-    printf("sizing up\n");
     const int new_size = table->base_size * 2;
     hashtable_resize(table, new_size);
 }
@@ -104,7 +105,6 @@ static int get_hash(const char *str, const int num_buckets, const int attempt) {
 void hashtable_insert(hashtable *ht, const char *key, const char *value) {
     // check if the table needs to be resized
     const int size_ratio = ((ht->count + 1) * 100) / ht->size;
-    printf("%d\n", size_ratio);
     if (size_ratio > 70) hashtable_resize_up(ht);
 
     hashitem *item = new_hashitem(key, value);

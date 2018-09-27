@@ -5,6 +5,7 @@
 #include "project/primes.h"
 
 #define HASHTABLE_ITEM_COUNT 50
+#define HASHTABLE_UPDATE_COUNT 10
 
 int main() {
     const char *key1 = "insert key 1";
@@ -39,9 +40,11 @@ int main() {
     printf("get deleted key 1: %p\n", del_item_1);
     printf("get deleted key 2: %p\n", del_item_2);
 
+    printf("inserting many values and testing resize up\n");
     char *keys[HASHTABLE_ITEM_COUNT] = {};
     char *values[HASHTABLE_ITEM_COUNT] = {};
 
+    const int old_cap = table->size;
     for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {
         keys[i] = malloc(sizeof(char) * HASHTABLE_ITEM_COUNT * 2);
         values[i] = malloc(sizeof(char) * HASHTABLE_ITEM_COUNT * 2);
@@ -52,9 +55,42 @@ int main() {
         hashtable_insert(table, keys[i], values[i]);
     }
 
+    const int new_cap = table->size;
+    if (new_cap <= old_cap) {
+        printf("table did not resize up\n");
+    } else {
+        printf("table successfully resized\n");
+    }
+
     for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {
         const char *result = hashtable_search(table, keys[i]);
-        printf("key, value: %s %s\n", keys[i], values[i]);
+        if (strcmp(result, values[i])) {
+            printf(
+                "search does not match insert for key: %s\n\texpected: %s got "
+                "%s\n",
+                keys[i], values[i], result);
+        }
+    }
+
+    printf("testing update\n");
+    // update some random keys with a new value
+    char *update_string = "updated value";
+    for (int i = 0; i < HASHTABLE_UPDATE_COUNT; i++) {
+        values[rand() % table->size] = update_string;
+    }
+
+    for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {
+        hashtable_insert(table, keys[i], values[i]);
+    }
+
+    for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {
+        const char *result = hashtable_search(table, keys[i]);
+        if (strcmp(result, values[i])) {
+            printf(
+                "search does not match insert for key: %s\n\texpected: %s got "
+                "%s\n",
+                keys[i], values[i], result);
+        }
     }
 
     del_hashtable(table);
