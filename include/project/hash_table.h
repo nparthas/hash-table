@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../project/primes.h"
+
 typedef struct hashitem_t {
     char *key;
     char *value;
@@ -13,11 +15,14 @@ typedef struct hashitem_t {
 
 typedef struct hashtable_t {
     int size;
+    int base_size;
     int count;
     hashitem **items;
 } hashtable;
 
 hashtable *new_hashtable();
+
+hashtable *new_hashtable_with_size(const int base_size);
 
 void del_hashtable(hashtable *table);
 

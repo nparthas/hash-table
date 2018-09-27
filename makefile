@@ -61,7 +61,7 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 # dependency files to provide header dependencies
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
-	$(CC) $(CCFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@ -g
+	$(CC) $(CCFLAGS) -g $(INCLUDES) -MP -MMD -c $< -o $@ 
 
 
 

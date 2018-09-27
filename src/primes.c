@@ -27,11 +27,12 @@ bool is_prime(int num) {
 }
 
 int next_prime(int num) {
+    // if the number is already prime, return it
+    if (is_prime(num)) return num;
+
     // special case 2, it's even and a prime
     if (num == 1) return 2;
 
-    // we don't want the same number back if it is prime
-    num++;
     // if the new number is even, make it odd
     if (!(num % 2)) num++;
 
