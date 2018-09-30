@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include <stdlib.h>
 
-#include <stdio.h>
 #include "project/hash_table.h"
 #include "project/primes.h"
 
@@ -9,7 +9,7 @@
 
 int main() {
     const char *key1 = "insert key 1";
-    const char *value = "insert value 1";
+    const char *value1 = "insert value 1";
 
     const char *key2 = "insert key 2";
     const char *value2 = "insert value 2";
@@ -17,7 +17,7 @@ int main() {
     hashtable *table = new_hashtable();
 
     printf("inserting key 1\n");
-    hashtable_insert(table, key1, value2);
+    hashtable_insert(table, key1, value1);
 
     printf("inserting key 2\n");
     hashtable_insert(table, key2, value2);
@@ -76,7 +76,8 @@ int main() {
     // update some random keys with a new value
     char *update_string = "updated value";
     for (int i = 0; i < HASHTABLE_UPDATE_COUNT; i++) {
-        values[rand() % table->size] = update_string;
+        int index = rand() % HASHTABLE_ITEM_COUNT;
+        values[index] = update_string;
     }
 
     for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {

@@ -2,11 +2,18 @@
 
 #include <stdio.h>
 
-const static int HT_PRIME_1 = 211;
-const static int HT_PRIME_2 = 257;
-const static int HT_BASE_SIZE = 53;
+static const int HT_PRIME_1 = 211;
+static const int HT_PRIME_2 = 257;
+static const int HT_BASE_SIZE = 53;
 
 static hashitem HT_DELETED_ITEM = {NULL, NULL};
+
+static char *strdup(const char *str) {
+    size_t len = strlen(str) + 1;
+    void *new = malloc(len);
+    if (new == NULL) return NULL;
+    return (char *)memcpy(new, str, len);
+}
 
 static hashitem *new_hashitem(const char *key, const char *value) {
     hashitem *item = malloc(sizeof(hashitem));
@@ -33,7 +40,6 @@ static void hashtable_resize(hashtable *ht, const int base_size) {
         hashitem *item = ht->items[i];
         if (item != NULL && item != &HT_DELETED_ITEM) {
             hashtable_insert(temp_ht, item->key, item->value);
-            ht->items[i] = NULL;
         }
     }
 

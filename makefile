@@ -1,4 +1,4 @@
-CC ?= gcc 
+CC ?= gcc
 
 SRC_PATH = src
 BUILD_PATH = build
@@ -14,9 +14,7 @@ OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 DEPS = $(OBJECTS:.o=.d)
 
 COMPILE_FLAGS = -std=c11 -Wall -Wextra -g
-INCLUDES = -I include/ -I /usr/local/include -I /usr/include 
-
-LIBS = 
+INCLUDES = -I include/ -I /usr/local/include -I /usr/include
 
 .PHONY: default_target
 default_target: release
@@ -61,8 +59,4 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 # dependency files to provide header dependencies
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
-	$(CC) $(CCFLAGS) -g $(INCLUDES) -MP -MMD -c $< -o $@ 
-
-
-
-
+	$(CC) $(COMPILE_FLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
