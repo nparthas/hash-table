@@ -4,7 +4,7 @@
 
 static const int HT_PRIME_1 = 211;
 static const int HT_PRIME_2 = 257;
-static const int HT_BASE_SIZE = 53;
+static const int HT_BASE_CAPACITY = 53;
 
 static hashitem HT_DELETED_ITEM = {NULL, NULL};
 
@@ -28,15 +28,15 @@ static void del_hashitem(hashitem *item) {
     free(item);
 }
 
-static void hashtable_resize(hashtable *ht, const int base_size) {
+static void hashtable_resize(hashtable *ht, const int base_capacity) {
     // we don't want to reduce the size down from the base
-    if (base_size <= HT_BASE_SIZE) return;
+    if (base_capacity <= HT_BASE_CAPACITY) return;
 
     // create the new table
-    hashtable *temp_ht = new_hashtable_with_size(base_size);
+    hashtable *temp_ht = new_hashtable_with_capacity(base_capacity);
 
     // insert all entries into the new table
-    for (int i = 0; i < ht->size; i++) {
+    for (int i = 0; i < ht->capacity; i++) {
         hashitem *item = ht->items[i];
         if (item != NULL && item != &HT_DELETED_ITEM) {
             hashtable_insert(temp_ht, item->key, item->value);
@@ -45,9 +45,9 @@ static void hashtable_resize(hashtable *ht, const int base_size) {
 
     ht->count = temp_ht->count;
     // swap the count for the delete call
-    ht->size ^= temp_ht->size;
-    temp_ht->size ^= ht->size;
-    ht->size ^= temp_ht->size;
+    ht->capacity ^= temp_ht->capacity;
+    temp_ht->capacity ^= ht->capacity;
+    ht->capacity ^= temp_ht->capacity;
 
     hashitem **tmp = ht->items;
     ht->items = temp_ht->items;
@@ -58,30 +58,32 @@ static void hashtable_resize(hashtable *ht, const int base_size) {
 }
 
 static void hashtable_resize_up(hashtable *table) {
-    const int new_size = table->base_size * 2;
-    hashtable_resize(table, new_size);
+    const int new_capacity = table->base_capacity * 2;
+    hashtable_resize(table, new_capacity);
 }
 
 static void hashtable_resize_down(hashtable *table) {
-    const int new_size = table->base_size / 2;
-    hashtable_resize(table, new_size);
+    const int new_capacity = table->base_capacity / 2;
+    hashtable_resize(table, new_capacity);
 }
 
-hashtable *new_hashtable_with_size(const int base_size) {
+hashtable *new_hashtable_with_capacity(const int base_capacity) {
     hashtable *table = malloc(sizeof(hashtable));
 
-    table->base_size = base_size;
-    table->size = next_prime(base_size);
+    table->base_capacity = base_capacity;
+    table->capacity = next_prime(base_capacity);
 
     table->count = 0;
-    table->items = calloc((size_t)table->size, sizeof(hashitem *));
+    table->items = calloc((size_t)table->capacity, sizeof(hashitem *));
     return table;
 }
 
-hashtable *new_hashtable() { return new_hashtable_with_size(HT_BASE_SIZE); }
+hashtable *new_hashtable() {
+    return new_hashtable_with_capacity(HT_BASE_CAPACITY);
+}
 
 void del_hashtable(hashtable *ht) {
-    for (int i = 0; i < ht->size; i++) {
+    for (int i = 0; i < ht->capacity; i++) {
         hashitem *item = ht->items[i];
         // we don't want to remove the deleted item marker
         if (item && item != &HT_DELETED_ITEM) {
@@ -110,11 +112,11 @@ static int get_hash(const char *str, const int num_buckets, const int attempt) {
 // this is messy, refactor
 void hashtable_insert(hashtable *ht, const char *key, const char *value) {
     // check if the table needs to be resized
-    const int size_ratio = ((ht->count + 1) * 100) / ht->size;
+    const int size_ratio = ((ht->count + 1) * 100) / ht->capacity;
     if (size_ratio > 70) hashtable_resize_up(ht);
 
     hashitem *item = new_hashitem(key, value);
-    int index = get_hash(item->key, ht->size, 0);
+    int index = get_hash(item->key, ht->capacity, 0);
     hashitem *cur_item = ht->items[index];
     int i = 1;
     while (cur_item != NULL) {
@@ -125,7 +127,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
                 return;
             }
         }
-        index = get_hash(item->key, ht->size, i);
+        index = get_hash(item->key, ht->capacity, i);
         cur_item = ht->items[index];
         i++;
     }
@@ -134,7 +136,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
 }
 
 char *hashtable_search(hashtable *ht, const char *key) {
-    int index = get_hash(key, ht->size, 0);
+    int index = get_hash(key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
@@ -143,7 +145,7 @@ char *hashtable_search(hashtable *ht, const char *key) {
                 return item->value;
             }
         }
-        index = get_hash(key, ht->size, i);
+        index = get_hash(key, ht->capacity, i);
         item = ht->items[index];
         i++;
     }
@@ -152,10 +154,10 @@ char *hashtable_search(hashtable *ht, const char *key) {
 
 void hashtable_remove(hashtable *ht, const char *key) {
     // check if the table needs to be resized
-    const int size_ratio = ((ht->count + 1) * 100) / ht->size;
+    const int size_ratio = ((ht->count + 1) * 100) / ht->capacity;
     if (size_ratio < 10) hashtable_resize_down(ht);
 
-    int index = get_hash(key, ht->size, 0);
+    int index = get_hash(key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
@@ -165,7 +167,7 @@ void hashtable_remove(hashtable *ht, const char *key) {
                 ht->items[index] = &HT_DELETED_ITEM;
             }
         }
-        index = get_hash(key, ht->size, i);
+        index = get_hash(key, ht->capacity, i);
         item = ht->items[index];
         i++;
     }

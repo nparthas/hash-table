@@ -44,7 +44,7 @@ int main() {
     char *keys[HASHTABLE_ITEM_COUNT] = {};
     char *values[HASHTABLE_ITEM_COUNT] = {};
 
-    const int old_cap = table->size;
+    const int old_cap = table->capacity;
     for (int i = 0; i < HASHTABLE_ITEM_COUNT; i++) {
         keys[i] = malloc(sizeof(char) * HASHTABLE_ITEM_COUNT * 2);
         values[i] = malloc(sizeof(char) * HASHTABLE_ITEM_COUNT * 2);
@@ -55,7 +55,7 @@ int main() {
         hashtable_insert(table, keys[i], values[i]);
     }
 
-    const int new_cap = table->size;
+    const int new_cap = table->capacity;
     if (new_cap <= old_cap) {
         printf("table did not resize up\n");
     } else {

@@ -14,15 +14,15 @@ typedef struct hashitem_t {
 } hashitem;
 
 typedef struct hashtable_t {
-    int size;
-    int base_size;
+    int capacity;
+    int base_capacity;
     int count;
     hashitem **items;
 } hashtable;
 
 hashtable *new_hashtable();
 
-hashtable *new_hashtable_with_size(const int base_size);
+hashtable *new_hashtable_with_capacity(const int base_capacity);
 
 void del_hashtable(hashtable *table);
 
