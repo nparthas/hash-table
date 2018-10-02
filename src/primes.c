@@ -1,7 +1,5 @@
 #include "project/primes.h"
 
-#include <stdio.h>
-
 bool is_prime(int num) {
     // 1 not is prime
     if (num == 1) return false;
@@ -16,8 +14,8 @@ bool is_prime(int num) {
     if (num % 3 == 0) return false;
 
     // check divisibility for all numbers less than sqrt
-    int r = sqrt(num);
-    int f = 5;
+    int64_t r = (int64_t)sqrtl(num);
+    int64_t f = 5;
     while (f <= r) {
         if (num % f == 0) return false;
         if (num % (f + 2) == 0) return false;
@@ -26,7 +24,7 @@ bool is_prime(int num) {
     return true;
 }
 
-int next_prime(int num) {
+int64_t next_prime(int num) {
     // if the number is already prime, return it
     if (is_prime(num)) return num;
 
@@ -34,10 +32,11 @@ int next_prime(int num) {
     if (num == 1) return 2;
 
     // if the new number is even, make it odd
-    if (!(num % 2)) num++;
+    int64_t num_l = (int64_t)num;
+    if (!(num_l % 2)) num_l++;
 
-    while (!is_prime(num)) {
-        num += 2;
+    while (!is_prime(num_l)) {
+        num_l += 2;
     }
-    return num;
+    return num_l;
 }

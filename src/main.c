@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <limits.h>
+
 #include "project/hash_table.h"
 #include "project/primes.h"
 
@@ -22,8 +24,9 @@ int main() {
     printf("inserting key 2\n");
     hashtable_insert(table, key2, value2);
 
+    printf("searching for keys\n");
     const char *result_1 = hashtable_search(table, key1);
-    const char *result_2 = hashtable_search(table, key1);
+    const char *result_2 = hashtable_search(table, key2);
 
     printf("got key 1: %s\n", result_1);
     printf("got key 2: %s\n", result_2);
@@ -34,6 +37,7 @@ int main() {
     printf("removing key 2\n");
     hashtable_remove(table, key2);
 
+    printf("searching for deleted keys\n");
     const char *del_item_1 = hashtable_search(table, key1);
     const char *del_item_2 = hashtable_search(table, key1);
 

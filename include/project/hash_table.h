@@ -17,6 +17,8 @@ typedef struct hashtable_t {
     int capacity;
     int base_capacity;
     int count;
+    // int (*hash_algorithm)(const char *str, const int hash_prime,
+    //                       const int num_buckets);
     hashitem **items;
 } hashtable;
 

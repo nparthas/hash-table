@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 
-static const int HT_PRIME_1 = 211;
-static const int HT_PRIME_2 = 257;
+static const int HT_PRIME_1 = 1073741827;
+static const int HT_PRIME_2 = 1073741831;
 static const int HT_BASE_CAPACITY = 53;
 
 static hashitem HT_DELETED_ITEM = {NULL, NULL};
