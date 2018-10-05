@@ -33,7 +33,8 @@ static void hashtable_resize(hashtable *ht, const int base_capacity) {
     if (base_capacity <= HT_BASE_CAPACITY) return;
 
     // create the new table
-    hashtable *temp_ht = new_hashtable_with_capacity(base_capacity);
+    hashtable *temp_ht =
+        new_hashtable_with_capacity(ht->hash_algorithm, base_capacity);
 
     // insert all entries into the new table
     for (int i = 0; i < ht->capacity; i++) {
@@ -67,8 +68,10 @@ static void hashtable_resize_down(hashtable *table) {
     hashtable_resize(table, new_capacity);
 }
 
-hashtable *new_hashtable_with_capacity(const int base_capacity) {
+hashtable *new_hashtable_with_capacity(hashfunction_f algorithm,
+                                       const int base_capacity) {
     hashtable *table = malloc(sizeof(hashtable));
+    table->hash_algorithm = algorithm;
 
     table->base_capacity = base_capacity;
     table->capacity = next_prime(base_capacity);
@@ -78,8 +81,8 @@ hashtable *new_hashtable_with_capacity(const int base_capacity) {
     return table;
 }
 
-hashtable *new_hashtable() {
-    return new_hashtable_with_capacity(HT_BASE_CAPACITY);
+hashtable *new_hashtable(hashfunction_f algorithm) {
+    return new_hashtable_with_capacity(algorithm, HT_BASE_CAPACITY);
 }
 
 void del_hashtable(hashtable *ht) {
@@ -93,7 +96,7 @@ void del_hashtable(hashtable *ht) {
     free(ht);
 }
 
-static int hash(const char *str, const int hash_prime, const int num_buckets) {
+int naive_hash(const char *str, const int hash_prime, const int num_buckets) {
     long hash = 0;
     const int str_len = strlen(str);
     for (int i = 0; i < str_len; i++) {
@@ -103,9 +106,10 @@ static int hash(const char *str, const int hash_prime, const int num_buckets) {
     return (int)hash;
 }
 
-static int get_hash(const char *str, const int num_buckets, const int attempt) {
-    const int hash_a = hash(str, HT_PRIME_1, num_buckets);
-    const int hash_b = hash(str, HT_PRIME_2, num_buckets);
+static int get_hash(hashtable *ht, const char *str, const int num_buckets,
+                    const int attempt) {
+    const int hash_a = ht->hash_algorithm(str, HT_PRIME_1, num_buckets);
+    const int hash_b = ht->hash_algorithm(str, HT_PRIME_2, num_buckets);
     return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
 }
 
@@ -116,7 +120,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
     if (size_ratio > 70) hashtable_resize_up(ht);
 
     hashitem *item = new_hashitem(key, value);
-    int index = get_hash(item->key, ht->capacity, 0);
+    int index = get_hash(ht, item->key, ht->capacity, 0);
     hashitem *cur_item = ht->items[index];
     int i = 1;
     while (cur_item != NULL) {
@@ -127,7 +131,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
                 return;
             }
         }
-        index = get_hash(item->key, ht->capacity, i);
+        index = get_hash(ht, item->key, ht->capacity, i);
         cur_item = ht->items[index];
         i++;
     }
@@ -136,7 +140,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
 }
 
 char *hashtable_search(hashtable *ht, const char *key) {
-    int index = get_hash(key, ht->capacity, 0);
+    int index = get_hash(ht, key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
@@ -145,7 +149,7 @@ char *hashtable_search(hashtable *ht, const char *key) {
                 return item->value;
             }
         }
-        index = get_hash(key, ht->capacity, i);
+        index = get_hash(ht, key, ht->capacity, i);
         item = ht->items[index];
         i++;
     }
@@ -157,7 +161,7 @@ void hashtable_remove(hashtable *ht, const char *key) {
     const int size_ratio = ((ht->count + 1) * 100) / ht->capacity;
     if (size_ratio < 10) hashtable_resize_down(ht);
 
-    int index = get_hash(key, ht->capacity, 0);
+    int index = get_hash(ht, key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
@@ -167,7 +171,7 @@ void hashtable_remove(hashtable *ht, const char *key) {
                 ht->items[index] = &HT_DELETED_ITEM;
             }
         }
-        index = get_hash(key, ht->capacity, i);
+        index = get_hash(ht, key, ht->capacity, i);
         item = ht->items[index];
         i++;
     }
