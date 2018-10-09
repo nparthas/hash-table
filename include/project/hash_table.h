@@ -3,12 +3,13 @@
 
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "../project/primes.h"
 
-typedef int (*hashfunction_f)(const char *, const int, const int);
+typedef uint32_t (*hashfunction_f)(const char *, const int, const int);
 
 typedef struct hashitem_t {
     char *key;
@@ -37,6 +38,10 @@ char *hashtable_search(hashtable *ht, const char *key);
 void hashtable_remove(hashtable *ht, const char *key);
 
 // hashing algorithms
-int naive_hash(const char *str, const int hash_prime, const int num_buckets);
+uint32_t hash_naive(const char *str, const int hash_prime,
+                    const int num_buckets);
+
+uint32_t hash_fnv1a(const char *str, const int hash_prime,
+                    const int num_buckets);
 
 #endif  // HASH_TABLE_HASH_TABLE_H

@@ -6,6 +6,10 @@ static const int HT_PRIME_1 = 1073741827;
 static const int HT_PRIME_2 = 1073741831;
 static const int HT_BASE_CAPACITY = 53;
 
+static const uint32_t FNV_OFFSET = 2166136261;
+static const uint32_t FNV_PRIME_1 = 16777619;
+static const uint32_t FNV_PRIME_2 = 16777639;
+
 static hashitem HT_DELETED_ITEM = {NULL, NULL};
 
 static char *strdup(const char *str) {
@@ -96,20 +100,32 @@ void del_hashtable(hashtable *ht) {
     free(ht);
 }
 
-int naive_hash(const char *str, const int hash_prime, const int num_buckets) {
-    long hash = 0;
-    const int str_len = strlen(str);
-    for (int i = 0; i < str_len; i++) {
-        hash += (long)powl(hash_prime, str_len - (i + 1)) * str[i];
+uint32_t hash_naive(const char *str, const int hash_prime,
+                    const int num_buckets) {
+    uint64_t hash = 0;
+    const size_t str_len = strlen(str);
+    for (uint32_t i = 0; i < str_len; i++) {
+        hash += (uint64_t)powl(hash_prime, str_len - (i + 1)) * str[i];
         hash %= num_buckets;
     }
-    return (int)hash;
+    return (uint32_t)hash;
 }
 
-static int get_hash(hashtable *ht, const char *str, const int num_buckets,
-                    const int attempt) {
-    const int hash_a = ht->hash_algorithm(str, HT_PRIME_1, num_buckets);
-    const int hash_b = ht->hash_algorithm(str, HT_PRIME_2, num_buckets);
+uint32_t hash_fnv1a(const char *str, const int hash_prime,
+                    const int num_buckets) {
+    uint64_t hash = FNV_OFFSET;
+    const size_t str_len = strlen(str);
+    for (uint32_t i = 0; i < str_len; i++) {
+        hash ^= (str[i] & 0xff);
+        hash *= FNV_PRIME;
+    }
+    return (uint32_t)hash;
+}
+
+static uint32_t get_hash(hashtable *ht, const char *str, const int num_buckets,
+                         const int attempt) {
+    const uint32_t hash_a = ht->hash_algorithm(str, HT_PRIME_1, num_buckets);
+    const uint32_t hash_b = ht->hash_algorithm(str, HT_PRIME_2, num_buckets);
     return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
 }
 
@@ -120,10 +136,11 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
     if (size_ratio > 70) hashtable_resize_up(ht);
 
     hashitem *item = new_hashitem(key, value);
-    int index = get_hash(ht, item->key, ht->capacity, 0);
+    uint32_t index = get_hash(ht, item->key, ht->capacity, 0);
     hashitem *cur_item = ht->items[index];
     int i = 1;
     while (cur_item != NULL) {
+        printf("%u\n", index);
         if (cur_item != &HT_DELETED_ITEM) {
             if (strcmp(cur_item->key, key) == 0) {
                 del_hashitem(cur_item);
@@ -140,7 +157,7 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
 }
 
 char *hashtable_search(hashtable *ht, const char *key) {
-    int index = get_hash(ht, key, ht->capacity, 0);
+    uint32_t index = get_hash(ht, key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
@@ -161,7 +178,7 @@ void hashtable_remove(hashtable *ht, const char *key) {
     const int size_ratio = ((ht->count + 1) * 100) / ht->capacity;
     if (size_ratio < 10) hashtable_resize_down(ht);
 
-    int index = get_hash(ht, key, ht->capacity, 0);
+    uint32_t index = get_hash(ht, key, ht->capacity, 0);
     hashitem *item = ht->items[index];
     int i = 1;
     while (item != NULL) {
