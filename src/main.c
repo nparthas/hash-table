@@ -10,14 +10,6 @@
 #define HASHTABLE_UPDATE_COUNT 10
 
 int main() {
-    uint64_t p = find_fnv1_prime(32);
-
-    printf("main here\n");
-    printf("prime: %lu\n", p);
-
-    while (1) {
-    }
-
     const char *key1 = "insert key 1";
     const char *value1 = "insert value 1";
 

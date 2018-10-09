@@ -2,8 +2,10 @@
 
 #include <stdio.h>
 
-static const int HT_PRIME_1 = 1073741827;
-static const int HT_PRIME_2 = 1073741831;
+// FNV primes do a better job with hashing, will use those for the naive hash as
+// well
+// static const int HT_PRIME_1 = 1073741827;
+// static const int HT_PRIME_2 = 1073741831;
 static const int HT_BASE_CAPACITY = 53;
 
 static const uint32_t FNV_OFFSET = 2166136261;
@@ -113,19 +115,20 @@ uint32_t hash_naive(const char *str, const int hash_prime,
 
 uint32_t hash_fnv1a(const char *str, const int hash_prime,
                     const int num_buckets) {
+    // we don't need the number of buckets, but we have to match the signature
     uint64_t hash = FNV_OFFSET;
     const size_t str_len = strlen(str);
     for (uint32_t i = 0; i < str_len; i++) {
         hash ^= (str[i] & 0xff);
-        hash *= FNV_PRIME;
+        hash *= hash_prime;
     }
     return (uint32_t)hash;
 }
 
 static uint32_t get_hash(hashtable *ht, const char *str, const int num_buckets,
                          const int attempt) {
-    const uint32_t hash_a = ht->hash_algorithm(str, HT_PRIME_1, num_buckets);
-    const uint32_t hash_b = ht->hash_algorithm(str, HT_PRIME_2, num_buckets);
+    const uint32_t hash_a = ht->hash_algorithm(str, FNV_PRIME_1, num_buckets);
+    const uint32_t hash_b = ht->hash_algorithm(str, FNV_PRIME_2, num_buckets);
     return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
 }
 
@@ -140,7 +143,6 @@ void hashtable_insert(hashtable *ht, const char *key, const char *value) {
     hashitem *cur_item = ht->items[index];
     int i = 1;
     while (cur_item != NULL) {
-        printf("%u\n", index);
         if (cur_item != &HT_DELETED_ITEM) {
             if (strcmp(cur_item->key, key) == 0) {
                 del_hashitem(cur_item);
