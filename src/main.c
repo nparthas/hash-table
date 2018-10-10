@@ -16,7 +16,7 @@ int main() {
     const char *key2 = "insert key 2";
     const char *value2 = "insert value 2";
 
-    hashtable *table = new_hashtable(hash_fnv1a);
+    hashtable *table = new_hashtable(hash_murmur3);
 
     printf("inserting key 1\n");
     hashtable_insert(table, key1, value1);

@@ -44,4 +44,7 @@ uint32_t hash_naive(const char *str, const int hash_prime,
 uint32_t hash_fnv1a(const char *str, const int hash_prime,
                     const int num_buckets);
 
+uint32_t hash_murmur3(const char *str, const int hash_prime,
+                      const int num_buckets);
+
 #endif  // HASH_TABLE_HASH_TABLE_H
